@@ -4,7 +4,6 @@
 	if ($end.length -eq 0){$end = "0"}
 	
 	#Mod-OSVersion
-	#."\\prxinffps003\Users_TPE\hluna\WindowsPowerShell\mod-osversion.ps1"
 	#. $env:My_dir\mod-osversion.ps1
 	$OS = Mod-OSVersion $server
 	if ($OS -ne "Server 2008"){
