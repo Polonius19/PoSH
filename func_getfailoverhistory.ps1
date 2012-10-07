@@ -23,15 +23,15 @@
 	$clusternode = Get-WmiObject -Class mscluster_node -Authentication PacketPrivacy -Impersonation Impersonate -namespace root\mscluster -ComputerName $server | Select-Object Name
     
     # Remove duplicates and sort alphabetically
-    $uniquenode = $null
+    	$uniquenode = $null
 	$uniquenode = $clusternode | Select-Object Name -Unique
 	
 	# Change $uniquenode type to string
 	$uniquenodeSTR = $null
 	$uniquenodeSTR = @()
-    foreach ($nodeA in $uniquenode) {
-    [string]$string = $nodeA
-    $uniquenodeSTR += [regex]::matches($string, "[Pp][Rr][BXVbxv][\w]{6}[\d]{3}[A-Ea-e]?") | foreach {$_.value }
+    	foreach ($nodeA in $uniquenode) {
+    		[string]$string = $nodeA
+    		$uniquenodeSTR += [regex]::matches($string, "[Pp][Rr][BXVbxv][\w]{6}[\d]{3}[A-Ea-e]?") | foreach {$_.value }
 	}
 	
 	foreach ($nodeB in $uniquenodeSTR) {
