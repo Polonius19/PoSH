@@ -1,0 +1,60 @@
+#set default erroraction
+$ErrorActionPreference = 'SilentlyContinue'
+
+#file output variables
+$path = "P:\Documents\"
+$file = "AD-SecGroups_members5-12-2014.csv"
+
+#this script requires the free Quest ActiveRoles Management Shell snapin to be installed
+#(http://www.quest.com/powershell/activeroles-server.aspx)
+
+#load QAD snapin, if not already
+if(!(Get-pssnapin | Where-Object {$_.Name -eq "Quest.ActiveRoles.ADManagement"})){
+        Add-PSSnapin Quest.ActiveRoles.ADManagement
+}
+
+#list of GUID of all AD groups
+$ad_group_guid = Get-Content  P:\Documents\ad_groups-all.list
+
+foreach($group in $ad_group_guid){#iterate through group guid list
+
+    $info = $null; $info = @()
+    $info = "" | select 'Group Name',Member,'Member Type','Member Disabled'
+
+    $info_holder_a = Get-QADGroup -Identity $group
+    
+    $info.'Group Name' = $info_holder_a.GroupName
+
+    $groupmembers = $null;$groupmembers=@();
+    $groupmembers = $info_holder_a | select members -ExpandProperty members
+
+    if($groupmembers.count -lt 1){
+        $info.Member = 'No Members'
+        $info.'Member Type' = 'Not Applicable'
+        $info.'Member Disabled' = 'Not Applicable'
+
+        $info | Export-Csv -NoTypeInformation -Append -Path $path$file
+    }
+    else{
+        foreach($groupmember in $groupmembers){ #iterate through members for group
+        
+            $info_holder_b = Get-QADObject $groupmember
+
+            if($info_holder_b.Type -eq 'group'){
+            $info.Member = $info_holder_b.Name
+            $info.'Member Type' = 'Group'
+            $info.'Member Disabled' = 'Not Applicable'
+            }
+            if($info_holder_b.Type -eq 'user'){
+                $info_holder_c = Get-QADUser -Identity $groupmember
+
+                $info.Member = $info_holder_c.NTAccountName
+                $info.'Member Type' = 'User'
+                $info.'Member Disabled' = $info_holder_c.AccountIsDisabled  
+            }
+        
+            $info | Export-Csv -NoTypeInformation -Append -Path $path$file
+
+        } #end iterate through members for group
+    }
+} #end iterate through group guid list
